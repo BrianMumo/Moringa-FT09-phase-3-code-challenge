@@ -4,67 +4,53 @@ from models.article import Article
 from models.author import Author
 from models.magazine import Magazine
 
+
 def main():
     # Initialize the database and create tables
     create_tables()
 
-    # Collect user input
-    author_name = input("Enter author's name: ")
-    magazine_name = input("Enter magazine name: ")
-    magazine_category = input("Enter magazine category: ")
-    article_title = input("Enter article title: ")
-    article_content = input("Enter article content: ")
+    # Create sample authors
+    print("\nCreating authors...")
+    author1 = Author.create("John Doe")
+    author2 = Author.create("Jane Smith")
+    print(f"Created authors: {author1}, {author2}")
 
-    # Connect to the database
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    # Create sample magazines
+    print("\nCreating magazines...")
+    magazine1 = Magazine.create("Tech Weekly", "Technology")
+    magazine2 = Magazine.create("Fashion Forward", "Lifestyle")
+    print(f"Created magazines: {magazine1}, {magazine2}")
 
+    # Create sample articles
+    print("\nCreating articles...")
+    article1 = Article.create(author1, magazine1, "AI Innovations", "Content about AI.")
+    article2 = Article.create(author1, magazine2, "Tech in Fashion", "Content on tech influencing fashion.")
+    article3 = Article.create(author2, magazine1, "The Future of Robotics", "Robotics advancements.")
+    print(f"Created articles: {article1}, {article2}, {article3}")
 
-    '''
-        The following is just for testing purposes, 
-        you can modify it to meet the requirements of your implmentation.
-    '''
+    # Test author methods
+    print("\nTesting author methods...")
+    print(f"{author1.name}'s Articles: {author1.articles()}")
+    print(f"{author1.name}'s Magazines: {author1.magazines()}")
 
-    # Create an author
-    cursor.execute('INSERT INTO authors (name) VALUES (?)', (author_name,))
-    author_id = cursor.lastrowid # Use this to fetch the id of the newly created author
+    # Test magazine methods
+    print("\nTesting magazine methods...")
+    print(f"{magazine1.name}'s Articles: {magazine1.articles()}")
+    print(f"{magazine1.name}'s Contributors: {magazine1.contributors()}")
 
-    # Create a magazine
-    cursor.execute('INSERT INTO magazines (name, category) VALUES (?,?)', (magazine_name, magazine_category))
-    magazine_id = cursor.lastrowid # Use this to fetch the id of the newly created magazine
+    # Test article methods
+    print("\nTesting article methods...")
+    print(f"Article '{article1.title}' Author: {author1.name}")
+    print(f"Article '{article1.title}' Magazine: {magazine1.name}")
 
-    # Create an article
-    cursor.execute('INSERT INTO articles (title, content, author_id, magazine_id) VALUES (?, ?, ?, ?)',
-                   (article_title, article_content, author_id, magazine_id))
+    # Additional aggregate and association methods
+    print("\nTesting additional magazine methods...")
+    print(f"{magazine1.name} Article Titles: {[article.title for article in magazine1.articles()]}")
+    contributing_authors = [
+        author for author in magazine1.contributors() if len(author.articles()) > 2
+    ]
+    print(f"{magazine1.name} Contributing Authors: {contributing_authors if contributing_authors else 'None'}")
 
-    conn.commit()
-
-    # Query the database for inserted records. 
-    # The following fetch functionality should probably be in their respective models
-
-    cursor.execute('SELECT * FROM magazines')
-    magazines = cursor.fetchall()
-
-    cursor.execute('SELECT * FROM authors')
-    authors = cursor.fetchall()
-
-    cursor.execute('SELECT * FROM articles')
-    articles = cursor.fetchall()
-
-    conn.close()
-
-    # Display results
-    print("\nMagazines:")
-    for magazine in magazines:
-        print(Magazine(magazine["id"], magazine["name"], magazine["category"]))
-
-    print("\nAuthors:")
-    for author in authors:
-        print(Author(author["id"], author["name"]))
-
-    print("\nArticles:")
-    for article in articles:
-        print(Article(article["id"], article["title"], article["content"], article["author_id"], article["magazine_id"]))
 
 if __name__ == "__main__":
     main()
